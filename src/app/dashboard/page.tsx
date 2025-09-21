@@ -6,7 +6,7 @@ export default async function DashboardPage() {
   const mockUser = {
     id: "demo-user",
     name: "Demo User",
-    email: "demo@cout.ai", 
+    email: "demo@cout.ai",
     emailVerified: new Date(),
     image: null,
     password: "",
@@ -35,8 +35,8 @@ export default async function DashboardPage() {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-      agents: []
-    }
+      agents: [],
+    },
   } as any;
 
   return (
@@ -48,17 +48,16 @@ export default async function DashboardPage() {
             <span className="text-yellow-600">🚀</span>
             <div>
               <h3 className="text-yellow-800 font-medium">Demo Dashboard</h3>
-              <p className="text-yellow-700 text-sm">You're viewing the dashboard with mock data. Click the 🚀 Demo Dashboard button to access this anytime!</p>
+              <p className="text-yellow-700 text-sm">
+                You're viewing the dashboard with mock data. Click the 🚀 Demo
+                Dashboard button to access this anytime!
+              </p>
             </div>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <StatsCards
-          creditsRemaining={85}
-          jobsThisMonth={12}
-          activeAgents={3}
-        />
+        <StatsCards creditsRemaining={85} jobsThisMonth={12} activeAgents={3} />
 
         {/* Simple Demo Content */}
         <div className="grid lg:grid-cols-2 gap-6">
@@ -66,11 +65,26 @@ export default async function DashboardPage() {
             <h3 className="text-lg font-semibold mb-4">AI Agents</h3>
             <div className="space-y-3">
               {[
-                { name: 'Research Assistant', category: 'Research', status: 'Active' },
-                { name: 'Marketing Expert', category: 'Marketing', status: 'Active' },
-                { name: 'Finance Analyst', category: 'Finance', status: 'Active' }
+                {
+                  name: "Research Assistant",
+                  category: "Research",
+                  status: "Active",
+                },
+                {
+                  name: "Marketing Expert",
+                  category: "Marketing",
+                  status: "Active",
+                },
+                {
+                  name: "Finance Analyst",
+                  category: "Finance",
+                  status: "Active",
+                },
               ].map((agent, i) => (
-                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+                >
                   <div>
                     <p className="font-medium text-sm">{agent.name}</p>
                     <p className="text-xs text-slate-600">{agent.category}</p>
@@ -87,16 +101,33 @@ export default async function DashboardPage() {
             <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
             <div className="space-y-3">
               {[
-                { task: 'Market analysis completed', time: '2 hours ago', credits: 3 },
-                { task: 'Social media campaign created', time: '4 hours ago', credits: 2 },
-                { task: 'Financial report generated', time: '1 day ago', credits: 1 }
+                {
+                  task: "Market analysis completed",
+                  time: "2 hours ago",
+                  credits: 3,
+                },
+                {
+                  task: "Social media campaign created",
+                  time: "4 hours ago",
+                  credits: 2,
+                },
+                {
+                  task: "Financial report generated",
+                  time: "1 day ago",
+                  credits: 1,
+                },
               ].map((activity, i) => (
-                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+                >
                   <div>
                     <p className="font-medium text-sm">{activity.task}</p>
                     <p className="text-xs text-slate-600">{activity.time}</p>
                   </div>
-                  <span className="text-xs text-slate-500">{activity.credits} credits</span>
+                  <span className="text-xs text-slate-500">
+                    {activity.credits} credits
+                  </span>
                 </div>
               ))}
             </div>
