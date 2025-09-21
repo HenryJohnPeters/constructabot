@@ -120,7 +120,10 @@ if (require.main === module) {
             resource: `job:${jobId}`,
             userId,
             orgId,
-            metadata: JSON.stringify({ credits: 1, outputLength: output.length }),
+            metadata: JSON.stringify({
+              credits: 1,
+              outputLength: output.length,
+            }),
           },
         });
 

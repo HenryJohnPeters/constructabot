@@ -3,7 +3,16 @@ services:
     name: constructabot
     env: node
     plan: free
-    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy && npm run build
+    buildCommand: |
+      npm install && 
+      echo "Generating Prisma client..." && 
+      npx prisma generate && 
+      echo "Running database migrations..." && 
+      npm run db:deploy && 
+      echo "Verifying database setup..." && 
+      npm run db:init && 
+      echo "Database setup complete. Building application..." && 
+      npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV

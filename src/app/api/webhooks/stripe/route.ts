@@ -103,7 +103,10 @@ export async function POST(request: NextRequest) {
                 action: "CREDITS_RESET",
                 resource: `subscription:${subscription.id}`,
                 orgId: subscription.orgId,
-                metadata: JSON.stringify({ newCredits, plan: subscription.plan }),
+                metadata: JSON.stringify({
+                  newCredits,
+                  plan: subscription.plan,
+                }),
               },
             });
           }

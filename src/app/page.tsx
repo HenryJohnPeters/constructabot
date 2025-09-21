@@ -36,7 +36,10 @@ export default function HomePage() {
             </Link>
             {/* Development bypass button */}
             <Link href="/dashboard">
-              <Button variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-200">
+              <Button
+                variant="outline"
+                className="bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-200"
+              >
                 🚀 Demo Dashboard
               </Button>
             </Link>

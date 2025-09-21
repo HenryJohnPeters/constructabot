@@ -78,7 +78,8 @@ export default async function AgentsPage() {
                     </h3>
                     <span
                       className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        agentTypeColors[agent.category] || "bg-gray-100 text-gray-800"
+                        agentTypeColors[agent.category] ||
+                        "bg-gray-100 text-gray-800"
                       }`}
                     >
                       {agent.category.replace("_", " ")}
