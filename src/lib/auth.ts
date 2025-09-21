@@ -19,6 +19,21 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        // Demo credentials bypass - allows admin@demo.com / admin123 to work without database
+        if (
+          credentials.email === "admin@demo.com" &&
+          credentials.password === "admin123"
+        ) {
+          return {
+            id: "demo-admin",
+            email: "admin@demo.com",
+            name: "Demo Admin",
+            role: "ADMIN",
+            orgId: "demo-org",
+            orgSlug: "demo-org",
+          };
+        }
+
         // Development bypass
         if (
           process.env.SKIP_AUTH === "true" &&
@@ -30,7 +45,7 @@ export const authOptions: NextAuthOptions = {
             name: "Development User",
             role: "ADMIN",
             orgId: "dev-org",
-            orgSlug: "dev-org", // Add missing orgSlug
+            orgSlug: "dev-org",
           };
         }
 
