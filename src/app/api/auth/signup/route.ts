@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Handle database table not found errors
-    if (error.code === 'P2021') {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2021') {
       console.error("Database tables not found. Please ensure migrations have been run.");
       return NextResponse.json(
         { error: "Service temporarily unavailable. Please try again later." },

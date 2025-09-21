@@ -57,7 +57,7 @@ export const authOptions: NextAuthOptions = {
         } catch (error) {
           console.error("Auth error:", error);
           // If database tables don't exist, return null instead of crashing
-          if (error.code === 'P2021') {
+          if (error && typeof error === 'object' && 'code' in error && error.code === 'P2021') {
             console.error("Database tables not found. Please ensure migrations have been run.");
             return null;
           }
