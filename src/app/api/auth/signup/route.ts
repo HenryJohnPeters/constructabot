@@ -85,25 +85,25 @@ export async function POST(request: NextRequest) {
           name: "Research Assistant",
           description: "Deep research and market analysis",
           category: "RESEARCH" as const,
-          config: {
+          config: JSON.stringify({
             systemPrompt:
               "You are a research assistant that provides thorough analysis.",
             temperature: 0.7,
             maxTokens: 1000,
             model: "gpt-4",
-          },
+          }),
         },
         {
           name: "Marketing Expert",
           description: "Content creation and marketing strategy",
           category: "MARKETING" as const,
-          config: {
+          config: JSON.stringify({
             systemPrompt:
               "You are a marketing expert focused on growth and engagement.",
             temperature: 0.8,
             maxTokens: 1200,
             model: "gpt-4",
-          },
+          }),
         },
       ];
 
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
           resource: `org:${org.id}`,
           userId: user.id,
           orgId: org.id,
-          metadata: { orgName, userEmail: email },
+          metadata: JSON.stringify({ orgName, userEmail: email }),
         },
       });
 
