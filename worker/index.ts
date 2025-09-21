@@ -108,7 +108,7 @@ const worker = new Worker(
           resource: `job:${jobId}`,
           userId,
           orgId,
-          metadata: { credits: 1, outputLength: output.length },
+          metadata: JSON.stringify({ credits: 1, outputLength: output.length }),
         },
       });
 
@@ -132,9 +132,9 @@ const worker = new Worker(
           resource: `job:${jobId}`,
           userId,
           orgId,
-          metadata: {
+          metadata: JSON.stringify({
             error: error instanceof Error ? error.message : "Unknown error",
-          },
+          }),
         },
       });
 

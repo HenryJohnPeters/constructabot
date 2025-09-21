@@ -41,6 +41,7 @@ export const authOptions: NextAuthOptions = {
 
           if (
             user &&
+            user.password &&
             (await bcrypt.compare(credentials.password, user.password))
           ) {
             return {
@@ -134,7 +135,6 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/auth/signin",
-    signUp: "/auth/signup",
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

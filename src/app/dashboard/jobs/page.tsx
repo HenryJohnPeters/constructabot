@@ -29,6 +29,7 @@ export default async function JobsPage() {
       org: {
         include: {
           subscription: true,
+          agents: true,
           jobs: {
             include: {
               agent: true,

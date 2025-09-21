@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
         resource: `job:${job.id}`,
         userId: session.user.id,
         orgId: session.user.orgId,
-        metadata: { agentId, prompt: prompt.slice(0, 100) },
+        metadata: JSON.stringify({ agentId, prompt: prompt.slice(0, 100) }),
       },
     });
 

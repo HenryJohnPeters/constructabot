@@ -34,7 +34,7 @@ export default async function AgentsPage() {
     redirect("/auth/signin");
   }
 
-  const agentTypeColors = {
+  const agentTypeColors: Record<string, string> = {
     RESEARCH: "bg-blue-100 text-blue-800",
     MARKETING: "bg-green-100 text-green-800",
     FINANCE: "bg-purple-100 text-purple-800",
@@ -78,7 +78,7 @@ export default async function AgentsPage() {
                     </h3>
                     <span
                       className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        agentTypeColors[agent.category]
+                        agentTypeColors[agent.category] || "bg-gray-100 text-gray-800"
                       }`}
                     >
                       {agent.category.replace("_", " ")}

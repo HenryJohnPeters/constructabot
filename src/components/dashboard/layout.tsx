@@ -25,7 +25,13 @@ interface DashboardLayoutProps {
   user: UserWithOrg;
 }
 
-const navigation = [
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: any;
+}
+
+const navigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
   { name: "Agents", href: "/dashboard/agents", icon: Bot },
   { name: "Jobs", href: "/dashboard/jobs", icon: FileText },
@@ -126,7 +132,7 @@ function SidebarContent({
   pathname,
   user,
 }: {
-  navigation: typeof navigation;
+  navigation: NavigationItem[];
   pathname: string;
   user: UserWithOrg;
 }) {

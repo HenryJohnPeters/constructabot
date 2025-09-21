@@ -7,7 +7,7 @@ const ChatInterface: React.FC = () => {
     const handleSend = async () => {
         if (!input.trim()) return;
 
-        const userMessage = { text: input, sender: 'user' };
+        const userMessage: { text: string; sender: 'user' | 'ai' } = { text: input, sender: 'user' };
         setMessages((prev) => [...prev, userMessage]);
         
         // Simulate AI response
@@ -20,7 +20,8 @@ const ChatInterface: React.FC = () => {
         });
 
         const aiMessage = await aiResponse.json();
-        setMessages((prev) => [...prev, { text: aiMessage.response, sender: 'ai' }]);
+        const aiMessageTyped: { text: string; sender: 'user' | 'ai' } = { text: aiMessage.response, sender: 'ai' };
+        setMessages((prev) => [...prev, aiMessageTyped]);
         setInput('');
     };
 

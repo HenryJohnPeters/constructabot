@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2023-10-16",
+  apiVersion: "2023-08-16",
 });
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
                 action: "CREDITS_RESET",
                 resource: `subscription:${subscription.id}`,
                 orgId: subscription.orgId,
-                metadata: { newCredits, plan: subscription.plan },
+                metadata: JSON.stringify({ newCredits, plan: subscription.plan }),
               },
             });
           }
