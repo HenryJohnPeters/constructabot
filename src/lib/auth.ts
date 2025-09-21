@@ -30,6 +30,7 @@ export const authOptions: NextAuthOptions = {
             name: "Development User",
             role: "ADMIN",
             orgId: "dev-org",
+            orgSlug: "dev-org", // Add missing orgSlug
           };
         }
 
@@ -78,7 +79,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = user.role;
         token.orgId = user.orgId;
-        token.orgSlug = user.orgSlug;
+        token.orgSlug = user.orgSlug || ""; // Handle potential undefined
       }
       return token;
     },
