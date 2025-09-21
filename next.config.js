@@ -7,12 +7,14 @@ const nextConfig = {
   images: {
     domains: ["lh3.googleusercontent.com", "avatars.githubusercontent.com"],
   },
-  env: {
-    DATABASE_URL: process.env.DATABASE_URL,
-    REDIS_URL: process.env.REDIS_URL || "",
-    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+  // Remove env exposure to avoid build-time errors with missing vars
+  typescript: {
+    // Allow production builds to complete even if there are type errors
+    ignoreBuildErrors: false,
+  },
+  eslint: {
+    // Allow production builds to complete even if there are ESLint errors
+    ignoreDuringBuilds: false,
   },
 };
 
