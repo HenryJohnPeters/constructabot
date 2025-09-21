@@ -1,11 +1,19 @@
 import { NextRequest } from "next/server";
 import Redis from "ioredis";
 
-const redis = new Redis({
-  host: process.env.REDIS_HOST,
-  port: parseInt(process.env.REDIS_PORT || "6379"),
-  password: process.env.REDIS_PASSWORD,
-});
+// Lazy Redis connection - only connect when rate limiting is actually used
+let redisConnection: Redis | null = null;
+
+function getRedisConnection() {
+  if (!redisConnection) {
+    redisConnection = new Redis({
+      host: process.env.REDIS_HOST,
+      port: parseInt(process.env.REDIS_PORT || "6379"),
+      password: process.env.REDIS_PASSWORD,
+    });
+  }
+  return redisConnection;
+}
 
 interface RateLimitConfig {
   windowMs: number;
@@ -25,6 +33,7 @@ export async function rateLimit(
   const windowKey = `${key}:${window}`;
 
   try {
+    const redis = getRedisConnection();
     const current = await redis.incr(windowKey);
 
     if (current === 1) {

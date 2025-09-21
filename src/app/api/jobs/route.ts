@@ -5,13 +5,27 @@ import { prisma } from "@/lib/prisma";
 import { Queue } from "bullmq";
 import { z } from "zod";
 
-const redis = new (require("ioredis"))({
-  host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT,
-  password: process.env.REDIS_PASSWORD,
-});
+// Lazy Redis connection - only connect when needed
+let redisConnection: any = null;
+let jobQueue: Queue | null = null;
 
-const jobQueue = new Queue("ai-jobs", { connection: redis });
+function getRedisConnection() {
+  if (!redisConnection) {
+    redisConnection = new (require("ioredis"))({
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT,
+      password: process.env.REDIS_PASSWORD,
+    });
+  }
+  return redisConnection;
+}
+
+function getJobQueue() {
+  if (!jobQueue) {
+    jobQueue = new Queue("ai-jobs", { connection: getRedisConnection() });
+  }
+  return jobQueue;
+}
 
 const createJobSchema = z.object({
   prompt: z.string().min(1).max(5000),
@@ -61,8 +75,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Add to queue
-    await jobQueue.add("process-ai-job", {
+    // Add to queue (lazy connection)
+    await getJobQueue().add("process-ai-job", {
       jobId: job.id,
       prompt,
       agentConfig: agent.config,

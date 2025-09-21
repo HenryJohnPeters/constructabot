@@ -2,12 +2,20 @@ import { Worker, Job } from "bullmq";
 import { prisma } from "../src/lib/prisma";
 import Redis from "ioredis";
 
-const redis = new Redis({
-  host: process.env.REDIS_HOST || "localhost",
-  port: parseInt(process.env.REDIS_PORT || "6379"),
-  password: process.env.REDIS_PASSWORD,
-  maxRetriesPerRequest: 3,
-});
+// Lazy Redis connection - only connect when worker actually starts
+let redisConnection: Redis | null = null;
+
+function getRedisConnection() {
+  if (!redisConnection) {
+    redisConnection = new Redis({
+      host: process.env.REDIS_HOST || "localhost",
+      port: parseInt(process.env.REDIS_PORT || "6379"),
+      password: process.env.REDIS_PASSWORD,
+      maxRetriesPerRequest: 3,
+    });
+  }
+  return redisConnection;
+}
 
 interface JobData {
   jobId: string;
@@ -40,127 +48,132 @@ async function callAIService(prompt: string, config: any): Promise<string> {
   );
 }
 
-const worker = new Worker(
-  "ai-jobs",
-  async (job: Job<JobData>) => {
-    const { jobId, prompt, agentConfig, orgId, userId } = job.data;
+// Only create worker if this file is run directly (not imported during build)
+if (require.main === module) {
+  const redis = getRedisConnection();
 
-    try {
-      console.log(`Processing job ${jobId} for org ${orgId}`);
+  const worker = new Worker(
+    "ai-jobs",
+    async (job: Job<JobData>) => {
+      const { jobId, prompt, agentConfig, orgId, userId } = job.data;
 
-      // Update job status to processing
-      await prisma.job.update({
-        where: { id: jobId },
-        data: { status: "PROCESSING" },
-      });
+      try {
+        console.log(`Processing job ${jobId} for org ${orgId}`);
 
-      // Call AI service (mock implementation)
-      const output = await callAIService(prompt, agentConfig);
+        // Update job status to processing
+        await prisma.job.update({
+          where: { id: jobId },
+          data: { status: "PROCESSING" },
+        });
 
-      // Update job with output
-      await prisma.job.update({
-        where: { id: jobId },
-        data: {
-          status: "COMPLETED",
-          output,
-        },
-      });
+        // Call AI service (mock implementation)
+        const output = await callAIService(prompt, agentConfig);
 
-      // Deduct credits from organization
-      await prisma.subscription.update({
-        where: { orgId },
-        data: { credits: { decrement: 1 } },
-      });
+        // Update job with output
+        await prisma.job.update({
+          where: { id: jobId },
+          data: {
+            status: "COMPLETED",
+            output,
+          },
+        });
 
-      // Track usage
-      await prisma.usage.create({
-        data: {
-          credits: 1,
-          action: "AI_JOB_COMPLETED",
-          userId,
-          orgId,
-        },
-      });
+        // Deduct credits from organization
+        await prisma.subscription.update({
+          where: { orgId },
+          data: { credits: { decrement: 1 } },
+        });
 
-      // Update usage bucket
-      const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
-      await prisma.usageBucket.upsert({
-        where: {
-          orgId_month: {
+        // Track usage
+        await prisma.usage.create({
+          data: {
+            credits: 1,
+            action: "AI_JOB_COMPLETED",
+            userId,
+            orgId,
+          },
+        });
+
+        // Update usage bucket
+        const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+        await prisma.usageBucket.upsert({
+          where: {
+            orgId_month: {
+              orgId,
+              month: currentMonth,
+            },
+          },
+          update: {
+            totalCredits: { increment: 1 },
+          },
+          create: {
             orgId,
             month: currentMonth,
+            totalCredits: 1,
           },
-        },
-        update: {
-          totalCredits: { increment: 1 },
-        },
-        create: {
-          orgId,
-          month: currentMonth,
-          totalCredits: 1,
-        },
-      });
+        });
 
-      // Log audit
-      await prisma.auditLog.create({
-        data: {
-          action: "JOB_COMPLETED",
-          resource: `job:${jobId}`,
-          userId,
-          orgId,
-          metadata: JSON.stringify({ credits: 1, outputLength: output.length }),
-        },
-      });
+        // Log audit
+        await prisma.auditLog.create({
+          data: {
+            action: "JOB_COMPLETED",
+            resource: `job:${jobId}`,
+            userId,
+            orgId,
+            metadata: JSON.stringify({ credits: 1, outputLength: output.length }),
+          },
+        });
 
-      console.log(`Job ${jobId} completed successfully`);
-    } catch (error) {
-      console.error(`Job ${jobId} failed:`, error);
+        console.log(`Job ${jobId} completed successfully`);
+      } catch (error) {
+        console.error(`Job ${jobId} failed:`, error);
 
-      // Update job status to failed
-      await prisma.job.update({
-        where: { id: jobId },
-        data: {
-          status: "FAILED",
-          output: "An error occurred while processing your request.",
-        },
-      });
+        // Update job status to failed
+        await prisma.job.update({
+          where: { id: jobId },
+          data: {
+            status: "FAILED",
+            output: "An error occurred while processing your request.",
+          },
+        });
 
-      // Log audit
-      await prisma.auditLog.create({
-        data: {
-          action: "JOB_FAILED",
-          resource: `job:${jobId}`,
-          userId,
-          orgId,
-          metadata: JSON.stringify({
-            error: error instanceof Error ? error.message : "Unknown error",
-          }),
-        },
-      });
+        // Log audit
+        await prisma.auditLog.create({
+          data: {
+            action: "JOB_FAILED",
+            resource: `job:${jobId}`,
+            userId,
+            orgId,
+            metadata: JSON.stringify({
+              error: error instanceof Error ? error.message : "Unknown error",
+            }),
+          },
+        });
 
-      throw error;
-    }
-  },
-  { connection: redis }
-);
+        throw error;
+      }
+    },
+    { connection: redis }
+  );
 
-worker.on("completed", (job) => {
-  console.log(`Job ${job.id} completed`);
-});
+  worker.on("completed", (job) => {
+    console.log(`Job ${job.id} completed`);
+  });
 
-worker.on("failed", (job, err) => {
-  console.error(`Job ${job?.id} failed:`, err);
-});
+  worker.on("failed", (job, err) => {
+    console.error(`Job ${job?.id} failed:`, err);
+  });
 
-worker.on("error", (err) => {
-  console.error("Worker error:", err);
-});
+  worker.on("error", (err) => {
+    console.error("Worker error:", err);
+  });
 
-console.log("🚀 AI Jobs Worker started");
+  console.log("🚀 AI Jobs Worker started");
 
-process.on("SIGINT", async () => {
-  console.log("Shutting down worker...");
-  await worker.close();
-  await redis.disconnect();
-  process.exit(0);
-});
+  process.on("SIGINT", async () => {
+    console.log("Shutting down worker...");
+    await worker.close();
+    await redis.disconnect();
+    process.exit(0);
+  });
+}

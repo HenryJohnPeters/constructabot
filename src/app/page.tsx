@@ -34,6 +34,12 @@ export default function HomePage() {
             <Link href="/auth/signup">
               <Button className="gradient-brand">Get Started</Button>
             </Link>
+            {/* Development bypass button */}
+            <Link href="/dashboard">
+              <Button variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-200">
+                🚀 Demo Dashboard
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
